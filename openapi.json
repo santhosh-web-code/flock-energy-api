@@ -24,6 +24,105 @@
                 }
               }
             }
+          },
+          "502": {
+            "description": "Bad Gateway - Upstream portal error or authentication failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout - Upstream portal request timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meters": {
+      "get": {
+        "tags": [
+          "Meters"
+        ],
+        "summary": "List and Search Smart Meters",
+        "description": "Retrieves a paginated list of smart meters from the Urja Meter Ops legacy portal. Supports optional keyword search filtering and pagination.",
+        "operationId": "list_meters_api_v1_meters_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Search term to filter meters (e.g., serial number or meter ID)",
+              "default": "",
+              "title": "Q"
+            },
+            "description": "Search term to filter meters (e.g., serial number or meter ID)"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number to retrieve (1-indexed)",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Page number to retrieve (1-indexed)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeterListResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway - Upstream portal error or authentication failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway Timeout - Upstream portal request timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
         }
       }
@@ -31,6 +130,52 @@
   },
   "components": {
     "schemas": {
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "Human-readable description of the error",
+            "examples": [
+              "Upstream portal authentication failed"
+            ]
+          },
+          "errorType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errortype",
+            "description": "Classification or category of the error",
+            "examples": [
+              "UpstreamAuthenticationError"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse",
+        "description": "Standardized error response payload."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -66,6 +211,187 @@
         ],
         "title": "HealthResponse",
         "description": "Health check response schema indicating service availability and metadata."
+      },
+      "MeterListResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/MeterRecord"
+            },
+            "type": "array",
+            "title": "Data",
+            "description": "List of smart meter records for the current page"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total count of meters matching the search query",
+            "examples": [
+              403
+            ]
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Current page number (1-indexed)",
+            "examples": [
+              1
+            ]
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Pagesize",
+            "description": "Number of records per page",
+            "examples": [
+              20
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "total",
+          "page",
+          "pageSize"
+        ],
+        "title": "MeterListResponse",
+        "description": "Paginated list response containing meter records and metadata.",
+        "examples": [
+          {
+            "data": [
+              {
+                "dtCode": "DT-NORTH-04",
+                "installStatus": "installed",
+                "make": "Secure Meters",
+                "meterId": "MTR-10023",
+                "phaseType": "1-phase",
+                "serialNo": "SN-8839201"
+              }
+            ],
+            "page": 1,
+            "pageSize": 20,
+            "total": 403
+          }
+        ]
+      },
+      "MeterRecord": {
+        "properties": {
+          "meterId": {
+            "type": "string",
+            "title": "Meterid",
+            "description": "Unique identifier assigned to the meter",
+            "examples": [
+              "MTR-10023"
+            ]
+          },
+          "serialNo": {
+            "type": "string",
+            "title": "Serialno",
+            "description": "Manufacturer hardware serial number",
+            "examples": [
+              "SN-8839201"
+            ]
+          },
+          "make": {
+            "type": "string",
+            "title": "Make",
+            "description": "Manufacturer or brand of the meter",
+            "examples": [
+              "Secure Meters"
+            ]
+          },
+          "phaseType": {
+            "type": "string",
+            "title": "Phasetype",
+            "description": "Electrical phase configuration (e.g., 1-phase, 3-phase)",
+            "examples": [
+              "1-phase"
+            ]
+          },
+          "installStatus": {
+            "type": "string",
+            "title": "Installstatus",
+            "description": "Operational installation status of the meter",
+            "examples": [
+              "installed"
+            ]
+          },
+          "dtCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dtcode",
+            "description": "Associated Distribution Transformer (DT) network code",
+            "examples": [
+              "DT-NORTH-04"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "meterId",
+          "serialNo",
+          "make",
+          "phaseType",
+          "installStatus"
+        ],
+        "title": "MeterRecord",
+        "description": "Representation of a single smart meter record from the Urja Meter Ops portal.\nVerified empirically via portal API inspection.",
+        "examples": [
+          {
+            "dtCode": "DT-NORTH-04",
+            "installStatus": "installed",
+            "make": "Secure Meters",
+            "meterId": "MTR-10023",
+            "phaseType": "1-phase",
+            "serialNo": "SN-8839201"
+          }
+        ]
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     }
   }

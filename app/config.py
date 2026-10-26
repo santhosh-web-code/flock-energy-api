@@ -34,16 +34,20 @@ class Settings(BaseModel):
 
     # Legacy portal connection settings - never hardcoded
     portal_base_url: str = Field(
-        default_factory=lambda: os.getenv("PORTAL_BASE_URL", ""),
+        default_factory=lambda: os.getenv("PORTAL_BASE_URL", "https://urja-ops.flockenergy.tech"),
         description="Base URL for the legacy Urja Meter Ops portal",
     )
     portal_username: str = Field(
         default_factory=lambda: os.getenv("PORTAL_USERNAME", ""),
-        description="Username for authenticating against the legacy portal",
+        description="Username (email) for authenticating against the legacy portal",
     )
     portal_password: str = Field(
         default_factory=lambda: os.getenv("PORTAL_PASSWORD", ""),
         description="Password for authenticating against the legacy portal",
+    )
+    portal_timeout_seconds: float = Field(
+        default_factory=lambda: float(os.getenv("PORTAL_TIMEOUT_SECONDS", "15.0")),
+        description="HTTP request timeout in seconds for upstream portal calls",
     )
 
     model_config = {
