@@ -1,0 +1,72 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Flock Energy - Urja Meter Ops API",
+    "description": "Clean, documented REST API wrapper around the Urja Meter Ops legacy portal.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health & Status"
+        ],
+        "summary": "Service Health Check",
+        "description": "Returns the operational status, version, and identity of the Flock Energy API service.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Current health status of the API service",
+            "examples": [
+              "ok"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Running API version",
+            "examples": [
+              "1.0.0"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "title": "Service",
+            "description": "Service name identifier",
+            "examples": [
+              "Flock Energy - Urja Meter Ops API"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "service"
+        ],
+        "title": "HealthResponse",
+        "description": "Health check response schema indicating service availability and metadata."
+      }
+    }
+  }
+}
